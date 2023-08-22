@@ -9,8 +9,6 @@
   Microsoft.EntityFrameworkCore
 
 ## References
-  ### Disclaimer
-  ChatGPT was used for quick debugging, asking questions that was then verified by the official docs before implementation. ChatGPT also made the dummy data to seed the database.
 
   Creating minimal web api:
   
@@ -19,3 +17,6 @@
   Blazor App:
   
   `https://dotnet.microsoft.com/en-us/learn/aspnet/blazor-tutorial/next`
+
+  ### Disclaimer
+  ChatGPT was used for quick debugging, asking questions that was then verified by the official docs before implementation. ChatGPT also made the dummy data to seed the database.
