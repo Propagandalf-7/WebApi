@@ -1,5 +1,10 @@
 # WebApi
 
+This is a simple code first implementation of a database, with a api and an web interface. The databse contains a simple structure of User, Groups and Permissions tables as well as a UserGroup and GroupPermission junction tables. Each user can be part of multiple groups and each group can have multiple permissions.
+
+The api allows for creation, update, delete and query of the users and groups, and the creation, delete and query of permissions.
+
+
 ## Installed Packages
 
   Microsoft.EntityFrameworkCore.InMemory
@@ -21,6 +26,10 @@
   Setting up relationships:
 
   https://learn.microsoft.com/en-us/ef/core/modeling/relationships?tabs=fluent-api
+
+  Language Integrated Query (LINQ)
+
+  https://learn.microsoft.com/en-us/dotnet/csharp/linq/
   
   Blazor App:
   
