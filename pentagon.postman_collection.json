@@ -1,0 +1,345 @@
+{
+	"info": {
+		"_postman_id": "ac855c15-2923-40a3-b3ae-fa1971d626e3",
+		"name": "pentagon",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29282734"
+	},
+	"item": [
+		{
+			"name": "/user",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7097/pentagon/user",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/user/{id}",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7097/pentagon/user/1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"user",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/user/{id}",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7097/pentagon/user/1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"user",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/user/{id}/group",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"groupids\": [1, 2]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7097/pentagon/user/1/groups",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"user",
+						"1",
+						"groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\":\"Rudi\",\r\n  \"surname\":\"du Toit\",\r\n  \"email\":\"rudidutoit071@gmail.com\",\r\n  \"password\":\"1235\",\r\n  \"GroupIds\": [2,8]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7097/pentagon/user",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/group",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7097/pentagon/group",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"group"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/group/id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7097/pentagon/group/1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"group",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/group/id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7097/pentagon/group/1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"group",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/group/id Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PermissionIds\": [\r\n        1,\r\n        2\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7097/pentagon/group/1/permissions",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"group",
+						"1",
+						"permissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/group",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"GroupName\":\"Test\",\r\n  \"PermissionIds\":[1]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7097/pentagon/group",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"group"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/permission",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7097/pentagon/permission",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"permission"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/permission/id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7097/pentagon/permission/1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"permission",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/permission/id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7097/pentagon/permission/7",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"permission",
+						"7"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/permission",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"PermissionName\":\"Test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7097/pentagon/permission",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"permission"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
