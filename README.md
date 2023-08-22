@@ -2,7 +2,7 @@
 
 This is a simple code first implementation of a database, with a api and an web interface. The databse contains a simple structure of User, Groups and Permissions tables as well as a UserGroup and GroupPermission junction tables. Each user can be part of multiple groups and each group can have multiple permissions.
 
-The api allows for creation, update, delete and query of the users and groups, and the creation, delete and query of permissions.
+The api allows for creation, update, delete and query of the users and groups, and the creation, delete and query of permissions. The postman collection in the repo allows for testing of the api endpoints.
 
 
 ## Installed Packages
