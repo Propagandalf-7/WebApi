@@ -13,6 +13,14 @@
   Creating minimal web api:
   
   https://learn.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-7.0&tabs=visual-studio
+
+  DBContext:
+
+  https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext?view=efcore-7.0
+
+  Setting up relationships:
+
+  https://learn.microsoft.com/en-us/ef/core/modeling/relationships?tabs=fluent-api
   
   Blazor App:
   
