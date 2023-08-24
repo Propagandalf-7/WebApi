@@ -1,0 +1,240 @@
+﻿@page "/groups"
+@using static GroupItemDTO
+@using static GroupInputDTO
+@using static PermissionItemDTO
+@using static EditPermissionsDTO
+@using System.Text
+@using System.Text.Json
+@using System.Text.RegularExpressions
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+<h3>Pentagon DB - Groups</h3>
+
+<button @onclick="StartAdd">Add New Group</button>
+
+@if (groups == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class='table'>
+        <thead>
+            <tr>
+                <th>Group Name</th>
+                <th>Permission Names</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var group in groups)
+            {
+                <tr>
+                    <td>@group.GroupName</td>
+                    <td>@string.Join(", ", group.PermissionNames)</td>
+                    <td>
+                        <button @onclick="() => StartEditGroupPermissions(group)">Edit Permissions</button>
+                        <button @onclick="() => StartDelete(group)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (showAddOrUpdate)
+{
+    <h3>@(showEditPermissions ? "Edit Group Permissions" : (groupInput == null || groupInput.GroupId == 0 ? "Add Group" : "Update Group"))</h3>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">
+            @errorMessage
+        </div>
+    }
+
+    @if (showEditPermissions)
+    {
+        <EditForm Model="permissionInput" OnValidSubmit="SubmitPermissions">
+            <!-- Permission editing form goes here -->
+            @foreach (var permission in permissions)
+            {
+                <div>
+                    <input type="checkbox" @bind="permission.Selected" id="@permission.PermissionId" />
+                    <label for="@permission.PermissionId">@permission.PermissionName</label>
+                </div>
+            }
+            <button type="submit">Submit</button>
+            <button @onclick="Cancel">Cancel</button>
+        </EditForm>
+    }
+    else
+    {
+        <EditForm Model="groupInput" OnValidSubmit="SubmitGroup">
+            <div>
+                <label>Group Name:</label>
+                <input placeholder="Group Name" @bind="groupInput.GroupName" />
+                <ValidationMessage For="@(() => groupInput.GroupName)" />
+            </div>
+
+            <!-- Permission checkboxes -->
+            @foreach (var permission in permissions)
+            {
+                <div>
+                    <input type="checkbox" @bind="permission.Selected" id="@permission.PermissionId" />
+                    <label for="@permission.PermissionId">@permission.PermissionName</label>
+                </div>
+            }
+
+            <button type="submit">Submit</button>
+            <button @onclick="Cancel">Cancel</button>
+        </EditForm>
+    }
+}
+
+@code {
+    private List<GroupItemDTO> groups;
+    private List<PermissionItemDTO> permissions;
+    private bool showAddOrUpdate = false;
+    private GroupInputDTO groupInput;
+    private EditPermissionsDTO permissionInput;
+    private string errorMessage = null;
+    private bool showEditPermissions = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGroups();
+        permissions = await Http.GetFromJsonAsync<List<PermissionItemDTO>>("https://localhost:7097/pentagon/permission");
+    }
+
+    private async Task LoadGroups()
+    {
+        groups = await Http.GetFromJsonAsync<List<GroupItemDTO>>("https://localhost:7097/pentagon/group");
+    }
+
+    private void StartAdd()
+    {
+        groupInput = new GroupInputDTO();
+        showAddOrUpdate = true;
+    }
+
+    private void StartUpdate(GroupItemDTO group)
+    {
+        groupInput = new GroupInputDTO
+            {
+                GroupId = group.GroupId,
+                GroupName = group.GroupName
+            };
+
+        foreach (var permission in permissions)
+        {
+            permission.Selected = group.PermissionIds.Contains(permission.PermissionId);
+        }
+
+        showAddOrUpdate = true;
+    }
+
+    private void StartEditGroupPermissions(GroupItemDTO group)
+    {
+        permissionInput = new EditPermissionsDTO
+            {
+                GroupId = group.GroupId,
+                PermissionIds = group.PermissionIds?.ToList() ?? new List<int>()
+            };
+
+        foreach (var permission in permissions)
+        {
+            permission.Selected = permissionInput.PermissionIds.Contains(permission.PermissionId);
+        }
+
+        showAddOrUpdate = true;
+        showEditPermissions = true;
+    }
+
+    private async Task SubmitGroup()
+    {
+        if (groupInput == null)
+        {
+            errorMessage = "Group input data is missing.";
+            return;
+        }
+
+        if (permissions == null)
+        {
+            errorMessage = "Permissions data is missing.";
+            return;
+        }
+
+        groupInput.PermissionIds = permissions.Where(p => p.Selected).Select(p => p.PermissionId).ToList();
+
+        HttpResponseMessage response;
+        if (groupInput.GroupId == 0)
+        {
+            if (Http == null)
+            {
+                errorMessage = "HTTP client is not initialized.";
+                return;
+            }
+            response = await Http.PostAsync("https://localhost:7097/pentagon/group", new StringContent(JsonSerializer.Serialize(groupInput), Encoding.UTF8, "application/json"));
+        }
+        else
+        {
+            if (Http == null)
+            {
+                errorMessage = "HTTP client is not initialized.";
+                return;
+            }
+            response = await Http.PutAsJsonAsync($"https://localhost:7097/pentagon/group/{groupInput.GroupId}", groupInput);
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            errorMessage = $"An error occurred: {response.ReasonPhrase}.";
+            return;
+        }
+
+        await LoadGroups();
+        showAddOrUpdate = false;
+        groupInput = null;
+        errorMessage = null;
+    }
+
+
+    private async Task SubmitPermissions()
+    {
+        permissionInput.PermissionIds = permissions.Where(p => p.Selected).Select(p => p.PermissionId).ToList();
+
+        var response = await Http.PutAsJsonAsync($"https://localhost:7097/pentagon/group/{permissionInput.GroupId}/permissions", permissionInput);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            errorMessage = $"An error occurred: {response.ReasonPhrase}.";
+            return;
+        }
+
+        await LoadGroups();
+        showAddOrUpdate = false;
+        permissionInput = null;
+        errorMessage = null;
+    }
+
+    private async Task StartDelete(GroupItemDTO group)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete the {group.GroupName} group?"))
+        {
+            await Http.DeleteAsync($"https://localhost:7097/pentagon/group/{group.GroupId}");
+            await LoadGroups();
+        }
+    }
+
+    private void Cancel()
+    {
+        showAddOrUpdate = false;
+        showEditPermissions = false;
+        groupInput = null;
+        permissionInput = null;
+        errorMessage = null;
+    }
+}

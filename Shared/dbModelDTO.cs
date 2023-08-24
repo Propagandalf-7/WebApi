@@ -2,6 +2,8 @@
 // for input, edit and viewing of the data. The data in these classes can be structured
 // in a specific way to return relationships between multiple tables as a single output
 // and also hide certain sensitive data.
+using System.ComponentModel.DataAnnotations;
+
 public class UserItemDTO
 {
     public int Id { get; set; }
@@ -61,6 +63,7 @@ public class UserItemDTO
 
 public class UserInputDTO
 {
+    public int Id { get; set; }
     public string Name { get; set; }
     public string Surname { get; set; }
     public string Email { get; set; }
@@ -69,12 +72,36 @@ public class UserInputDTO
     public List<string>? GroupNames { get; set; }
 }
 
+public class UserEditDTO
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Surname { get; set; }
+    public string Email { get; set; }
+    public string NewPassword { get; set; }
+    public string OldPassword { get; set; }
+    public List<int>? GroupIds { get; set; }
+    public List<string>? GroupNames { get; set; }
+}
+
+public class EditGroupsDTO
+{
+    public int Id { get; set; }
+    public List<int>? GroupIds { get; set; }
+}
+
+public class PasswordVerifyDTO
+{
+    public string Password { get; set; }
+}
+
 public class GroupItemDTO
 {
     public int GroupId { get; set; }
     public string? GroupName { get; set; }
     public List<string> PermissionNames { get; set; }
     public List<int> PermissionIds { get; set; }
+    public bool Selected { get; set; }
 
     public GroupItemDTO() { }
 
@@ -103,15 +130,28 @@ public class GroupItemDTO
 
 public class GroupInputDTO
 {
+    public int GroupId { get; set; }
     public string GroupName { get; set; }
     public List<int>? PermissionIds { get; set; }
     public List<int>? PermissionNames { get; set; }
+}
+
+public class EditPermissionsDTO
+{
+    public int GroupId { get; set; } // Group's ID for which permissions are being edited.
+
+    // List of permission IDs the group should have.
+    public List<int> PermissionIds { get; set; } = new List<int>();
 }
 
 public class PermissionItemDTO
 {
     public int PermissionId { get; set; }
     public string PermissionName { get; set; }
+
+    public bool Selected { get; set; }
+
+    public PermissionItemDTO() { }
     public PermissionItemDTO(Permission permission)
     {
         PermissionId = permission.PermissionId;

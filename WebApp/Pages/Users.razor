@@ -1,0 +1,375 @@
+﻿@page "/users"
+@using static UserItemDTO
+@using static GroupItemDTO
+@using static UserInputDTO
+@using System.Text
+@using System.Text.Json
+@using System.Text.RegularExpressions;
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+
+<h3>Users</h3>
+
+<button @onclick="StartAdd">Add New User</button>
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class='table'>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>Group Names</th>
+                <th>Permission Names</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Name</td>
+                    <td>@user.Surname</td>
+                    <td>@user.Email</td>
+                    <td>@string.Join(", ", user.GroupNames)</td>
+                    <td>@string.Join(", ", user.PermissionNames)</td>
+                    <td>
+                        <button @onclick="() => StartUpdate(user)">Update</button>
+                        <button @onclick="() => StartEditUserGroups(user)">Edit Groups</button>
+                        <button @onclick="() => StartDelete(user)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (showAddOrUpdate)
+{
+    <h3>@(showEditGroups ? "Edit User Groups" : (userInput == null || userInput.Id == 0 ? "Add User" : "Update User"))</h3>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">
+            @errorMessage
+        </div>
+    }
+
+    @if (showEditGroups)
+    {
+        <EditForm Model="groupInput" OnValidSubmit="SubmitGroups">
+            <!-- Group editing form goes here -->
+            @foreach (var group in groups)
+            {
+                <div>
+                    <input type="checkbox" @bind="group.Selected" id="@group.GroupId" />
+                    <label for="@group.GroupId">@group.GroupName</label>
+                </div>
+            }
+            <button type="submit">Submit</button>
+            <button @onclick="Cancel">Cancel</button>
+        </EditForm>
+    }
+    else
+    {
+        <EditForm Model="userInput" OnValidSubmit="SubmitUser">
+            <div>
+                <label>Name:</label>
+                <input placeholder="Name" @bind="userInput.Name" />
+                <ValidationMessage For="@(() => userInput.Name)" />
+            </div>
+
+            <div>
+                <label>Surname:</label>
+                <input placeholder="Surname" @bind="userInput.Surname" />
+                <ValidationMessage For="@(() => userInput.Surname)" />
+            </div>
+
+            <div>
+                <label>Email:</label>
+                <input placeholder="Email" @bind="userInput.Email" />
+                <ValidationMessage For="@(() => userInput.Email)" />
+            </div>
+
+            @if (userInput != null && userInput.Id != 0) // Existing User
+            {
+                <div>
+                    <label>Old Password:</label>
+                    <input type="password" placeholder="Old Password" @bind="oldPassword" />
+                </div>
+
+                <div>
+                    <label>New Password:</label>
+                    <input type="password" placeholder="New Password" @bind="password" />
+                </div>
+            }
+            else if (userInput == null || userInput.Id == 0) // New User
+            {
+                <div>
+                    <label>Password:</label>
+                    <input type="password" placeholder="Password" @bind="password" />
+                </div>
+            }
+
+
+            <!-- Group checkboxes -->
+            @foreach (var group in groups)
+            {
+                <div>
+                    <input type="checkbox" @bind="group.Selected" id="@group.GroupId" />
+                    <label for="@group.GroupId">@group.GroupName</label>
+                </div>
+            }
+
+            <button type="submit">Submit</button>
+            <button @onclick="Cancel">Cancel</button>
+        </EditForm>
+    }
+}
+
+
+
+@code {
+    private List<UserItemDTO> users;
+    private List<GroupItemDTO> groups;
+    private bool showAddOrUpdate = false;
+    private UserInputDTO userInput;
+    private EditGroupsDTO groupInput;
+    private string password;
+    private string oldPassword;
+    private int selectedGroupId;
+    private bool showEditGroups = false;
+    private string errorMessage = null;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+        groups = await Http.GetFromJsonAsync<List<GroupItemDTO>>("https://localhost:7097/pentagon/group");
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await Http.GetFromJsonAsync<List<UserItemDTO>>("https://localhost:7097/pentagon/user");
+    }
+
+    private void StartAdd()
+    {
+        userInput = new UserInputDTO
+            {
+                GroupIds = new List<int>(), // Ensure GroupIds is initialized
+                GroupNames = new List<string>() // Ensure GroupNames is initialized
+            };
+        showAddOrUpdate = true;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (userInput != null && userInput.GroupIds != null && userInput.GroupIds.Any())
+        {
+            selectedGroupId = userInput.GroupIds.First();
+        }
+    }
+
+    private void UpdateGroupIds(ChangeEventArgs e)
+    {
+        if (e.Value is string[] selectedGroupIds)
+        {
+            userInput.GroupIds = selectedGroupIds.Select(int.Parse).ToList();
+        }
+    }
+
+    private async Task SubmitGroups()
+    {
+        try
+        {
+            // Extract the selected group IDs from the groups list
+            groupInput.GroupIds = groups.Where(g => g.Selected).Select(g => g.GroupId).ToList();
+
+            // Make the HTTP request to update the groups for the user. 
+            // The endpoint URL might differ based on your backend API structure.
+            var response = await Http.PutAsJsonAsync($"https://localhost:7097/pentagon/user/{groupInput.Id}/groups", groupInput);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"An error occurred: {response.ReasonPhrase}.";
+                return;
+            }
+
+            // Optionally, you can refresh the users list to see the changes immediately
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An unexpected error occurred: {ex.Message}";
+        }
+        finally
+        {
+            // Reset form state regardless of success or error.
+            showAddOrUpdate = false;
+            showEditGroups = false;
+            groupInput = null;
+            errorMessage = null;
+        }
+    }
+
+    private void StartUpdate(UserItemDTO user)
+    {
+        userInput = new UserInputDTO
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Surname = user.Surname,
+                Email = user.Email,
+                GroupIds = user.GroupIds?.ToList() ?? new List<int>(),
+                GroupNames = user.GroupNames?.ToList() ?? new List<string>()
+            };
+
+        // Preselect the groups that the user is part of
+        foreach (var group in groups)
+        {
+            group.Selected = userInput.GroupIds.Contains(group.GroupId);
+        }
+
+        showAddOrUpdate = true;
+    }
+
+    private bool IsValidPassword(string password)
+    {
+        if (string.IsNullOrEmpty(password)) return false;
+
+        if (password.Length < 8) return false;
+
+        if (!password.Any(char.IsUpper)) return false;
+
+        if (!password.Any(char.IsDigit)) return false;
+
+        if (!password.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch))) return false;
+
+        return true;
+    }
+
+    private async Task StartDelete(UserItemDTO user)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {user.Name}?"))
+        {
+            await Http.DeleteAsync($"https://localhost:7097/pentagon/user/{user.Id}");
+            await LoadUsers();
+        }
+    }
+
+    private void StartEditUserGroups(UserItemDTO user)
+    {
+        groupInput = new EditGroupsDTO
+        {
+            Id = user.Id,
+            GroupIds = user.GroupIds?.ToList() ?? new List<int>()
+        };
+        foreach (var group in groups)
+        {
+            group.Selected = groupInput.GroupIds.Contains(group.GroupId);
+        }
+        showAddOrUpdate = true;
+        showEditGroups = true;
+    }
+
+    private async Task SubmitUser()
+    {
+        userInput.GroupIds = groups.Where(g => g.Selected).Select(g => g.GroupId).ToList();
+
+        if (userInput.Id == 0)  // New User
+        {
+            if (string.IsNullOrEmpty(userInput.Name))
+            {
+                errorMessage = "A name is required";
+                return;
+            }
+            if (string.IsNullOrEmpty(userInput.Surname))
+            {
+                errorMessage = "A surname is required";
+                return;
+            }
+            if (string.IsNullOrEmpty(userInput.Email))
+            {
+                errorMessage = "An email is required";
+                return;
+            }
+            else
+            {
+                var emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+                if (!Regex.IsMatch(userInput.Email, emailPattern))
+                {
+                    errorMessage = "Invalid email format";
+                    return;
+                }
+            }
+            if (!IsValidPassword(password))
+            {
+                errorMessage = "Password must be at least 8 characters long, contain at least one uppercase letter, one digit, and one special character.";
+                return;
+            }
+
+            userInput.Password = password;
+
+            // Make the HTTP post request
+            var response = await Http.PostAsync("https://localhost:7097/pentagon/user", new StringContent(JsonSerializer.Serialize(userInput), Encoding.UTF8, "application/json"));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                errorMessage = $"An error occurred: {response.ReasonPhrase}.";
+                return;
+            }
+        }
+        else  // Existing User
+        {
+            if (!string.IsNullOrEmpty(oldPassword) && !string.IsNullOrEmpty(password))
+            {
+                var response = await Http.PostAsJsonAsync($"https://localhost:7097/pentagon/user/{userInput.Id}/validate-password", new { OldPassword = oldPassword });
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var isValidOldPassword = await response.Content.ReadFromJsonAsync<bool>();
+                    if (!isValidOldPassword)
+                    {
+                        // Alert the user about the invalid old password and return
+                        await JSRuntime.InvokeVoidAsync("alert", "Invalid old password provided.");
+                        return;
+                    }
+
+                    userInput.Password = password;
+                }
+                else
+                {
+                    // Handle the error response here (e.g., alert the user about a server error)
+                    await JSRuntime.InvokeVoidAsync("alert", "An error occurred while validating the old password.");
+                    return;
+                }
+
+            }
+
+            await Http.PutAsJsonAsync($"https://localhost:7097/pentagon/user/{userInput.Id}", userInput);
+            showEditGroups = false;
+        }
+
+        await LoadUsers();
+        showAddOrUpdate = false;
+        userInput = null;
+        oldPassword = null; // Clear old password field
+        password = null;    // Clear new password field
+        errorMessage = null;
+    }
+
+    private void Cancel()
+    {
+        showAddOrUpdate = false;
+        showEditGroups = false;
+        userInput = null;
+        errorMessage = null;
+    }
+}

@@ -61,16 +61,16 @@ class db : DbContext
         );
 
         modelBuilder.Entity<User>().HasData(
-            new User { Id = 1, Name = "John", Surname = "Doe", Email = "john1@example.com", Password = "Password1!" },
-            new User { Id = 2, Name = "Jane", Surname = "Smith", Email = "jane2@example.com", Password = "Password2!" },
-            new User { Id = 3, Name = "Robert", Surname = "Johnson", Email = "robert3@example.com", Password = "Password3!" },
-            new User { Id = 4, Name = "Michael", Surname = "Williams", Email = "michael4@example.com", Password = "Password4!" },
-            new User { Id = 5, Name = "William", Surname = "Brown", Email = "william5@example.com", Password = "Password5!" },
-            new User { Id = 6, Name = "David", Surname = "Jones", Email = "david6@example.com", Password = "Password6!" },
-            new User { Id = 7, Name = "Richard", Surname = "Garcia", Email = "richard7@example.com", Password = "Password7!" },
-            new User { Id = 8, Name = "Joseph", Surname = "Miller", Email = "joseph8@example.com", Password = "Password8!" },
-            new User { Id = 9, Name = "Charles", Surname = "Davis", Email = "charles9@example.com", Password = "Password9!" },
-            new User { Id = 10, Name = "Thomas", Surname = "Rodriguez", Email = "thomas10@example.com", Password = "Password10!" }
+            new User { Id = 1, Name = "John", Surname = "Doe", Email = "john1@example.com", Password = "admin" },
+            new User { Id = 2, Name = "Jane", Surname = "Smith", Email = "jane2@example.com", Password = "admin" },
+            new User { Id = 3, Name = "Robert", Surname = "Johnson", Email = "robert3@example.com", Password = "admin" },
+            new User { Id = 4, Name = "Michael", Surname = "Williams", Email = "michael4@example.com", Password = "admin" },
+            new User { Id = 5, Name = "William", Surname = "Brown", Email = "william5@example.com", Password = "admin" },
+            new User { Id = 6, Name = "David", Surname = "Jones", Email = "david6@example.com", Password = "admin" },
+            new User { Id = 7, Name = "Richard", Surname = "Garcia", Email = "richard7@example.com", Password = "admin" },
+            new User { Id = 8, Name = "Joseph", Surname = "Miller", Email = "joseph8@example.com", Password = "admin" },
+            new User { Id = 9, Name = "Charles", Surname = "Davis", Email = "charles9@example.com", Password = "admin" },
+            new User { Id = 10, Name = "Thomas", Surname = "Rodriguez", Email = "thomas10@example.com", Password = "admin" }
         );
 
         modelBuilder.Entity<UserGroup>().HasData(

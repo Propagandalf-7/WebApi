@@ -1,0 +1,163 @@
+﻿@page "/permissions"
+@using static PermissionItemDTO
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@using System.Text
+@using System.Text.Json
+@using System.Text.RegularExpressions
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+<h3>Pentagon DB - Permissions</h3>
+
+<button @onclick="StartAdd">Add New Permission</button>
+
+@if (permissions == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class='table'>
+        <thead>
+            <tr>
+                <th>Permission Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var permission in permissions)
+            {
+                <tr>
+                    <td>@permission.PermissionName</td>
+                    <td>
+                        <button @onclick="() => StartDelete(permission)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (showAdd)
+{
+    <h3>Add Permission</h3>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">
+            @errorMessage
+        </div>
+    }
+
+    <EditForm Model="permissionInput" OnValidSubmit="SubmitPermission">
+        <div>
+            <label>Permission Name:</label>
+            <input placeholder="Permission Name" @bind="permissionInput.PermissionName" />
+            <ValidationMessage For="@(() => permissionInput.PermissionName)" />
+        </div>
+
+        <button type="submit">Add</button>
+        <button @onclick="Cancel">Cancel</button>
+    </EditForm>
+}
+
+@code {
+    private List<PermissionItemDTO> permissions;
+    private PermissionItemDTO permissionInput;
+    private bool showAdd = false;
+    private string errorMessage = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPermissions();
+    }
+
+    private async Task LoadPermissions()
+    {
+        permissions = await Http.GetFromJsonAsync<List<PermissionItemDTO>>("https://localhost:7097/pentagon/permission");
+    }
+
+    private void StartAdd()
+    {
+        permissionInput = new PermissionItemDTO();
+        showAdd = true;
+    }
+
+    private async Task SubmitPermission()
+    {
+        if (permissionInput == null)
+        {
+            errorMessage = "Permission input data is missing.";
+            return;
+        }
+
+        HttpResponseMessage response = await Http.PostAsync("https://localhost:7097/pentagon/permission", new StringContent(JsonSerializer.Serialize(permissionInput), Encoding.UTF8, "application/json"));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            errorMessage = $"An error occurred: {response.ReasonPhrase}.";
+            return;
+        }
+
+        await LoadPermissions();
+        showAdd = false;
+        permissionInput = null;
+        errorMessage = null;
+    }
+
+    private async Task StartDelete(PermissionItemDTO permission)
+    {
+        try
+        {
+            if (await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete the {permission.PermissionName} permission?"))
+            {
+                var response = await Http.DeleteAsync($"https://localhost:7097/pentagon/permission/{permission.PermissionId}");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+
+                    if (content.StartsWith("{") && content.EndsWith("}"))
+                    {
+                        var errorObj = JsonSerializer.Deserialize<TypedResults>(content);
+                        await JSRuntime.InvokeVoidAsync("alert", errorObj.Message);  // Popup the error message
+                    }
+                    else
+                    {
+                        await JSRuntime.InvokeVoidAsync("alert", content);  // Popup the error message
+                    }
+                }
+                else if (!response.IsSuccessStatusCode)
+                {
+                    errorMessage = $"An error occurred: {response.ReasonPhrase}.";
+                    await JSRuntime.InvokeVoidAsync("alert", errorMessage);  // Popup the error message
+                }
+                else
+                {
+                    await LoadPermissions();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An exception occurred: {ex.Message}";
+            await JSRuntime.InvokeVoidAsync("alert", errorMessage);  // Popup the exception message
+        }
+    }
+
+
+
+    public class TypedResults
+    {
+        public string Message { get; set; }
+    }
+
+
+    private void Cancel()
+    {
+        showAdd = false;
+        permissionInput = null;
+        errorMessage = null;
+    }
+}

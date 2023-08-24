@@ -30,6 +30,9 @@ todoItems.MapGet("/user/{id}", GetUser); // Get user by id
 todoItems.MapPost("/user", CreateUser); // Create a user
 todoItems.MapDelete("/user/{id}", DeleteUser); // Delete a user by id
 todoItems.MapPut("/user/{id}/groups", EditUserGroups); // Edit a user group
+todoItems.MapPut("/user/{id}", EditUserDetails); // Edit a user
+
+todoItems.MapPost("/user/{id}/verify-password", VerifyPassword); // Verify a user password
 
 todoItems.MapGet("/group", GetAllGroups); // Get all groups
 todoItems.MapGet("/group/{id}", GetGroup); // Get group by id
@@ -49,6 +52,23 @@ using (var scope = app.Services.CreateScope()) // Ensure seeded data gets loadin
     context.Database.EnsureCreated();
 }
 app.Run();
+
+static string HashPassword(string password)
+{
+    return password;
+}
+
+static bool VerifyHashedPassword(string checkPassword, string storedPassword)
+{
+    if (checkPassword == storedPassword)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 static async Task<IResult> GetAllUsers(db db)
 {
@@ -183,6 +203,112 @@ static async Task<IResult> AssignGroupsToUser(User user, List<int> groupIds, Lis
 
     user.UserGroups = userGroups;
     return TypedResults.Ok();
+}
+static async Task<IResult> EditUserDetails(int id, UserEditDTO userEditDTO, db db)
+{
+    var user = await db.Users
+        .Include(u => u.UserGroups)
+        .FirstOrDefaultAsync(u => u.Id == id);
+
+    if (user == null)
+    {
+        return TypedResults.NotFound($"User with ID {id} not found.");
+    }
+
+    // Check old password if a new one is provided
+    if (!string.IsNullOrWhiteSpace(userEditDTO.NewPassword))
+    {
+        if (string.IsNullOrWhiteSpace(userEditDTO.OldPassword))
+        {
+            return TypedResults.BadRequest("Old password is required to set a new password.");
+        }
+
+        var oldPasswordHash = HashPassword(userEditDTO.OldPassword); // Assuming you have a function to hash the password.
+
+        if (oldPasswordHash != user.Password)
+        {
+            return TypedResults.BadRequest("Old password is incorrect.");
+        }
+
+        user.Password = HashPassword(userEditDTO.NewPassword); // Update with new hashed password
+    }
+
+    // Update other user details
+    if (!string.IsNullOrWhiteSpace(userEditDTO.Name))
+    {
+        user.Name = userEditDTO.Name;
+    }
+
+    if (!string.IsNullOrWhiteSpace(userEditDTO.Surname))
+    {
+        user.Surname = userEditDTO.Surname;
+    }
+
+    if (!string.IsNullOrWhiteSpace(userEditDTO.Email))
+    {
+        var existingUserWithSameEmail = await db.Users.AnyAsync(u => u.Email == userEditDTO.Email && u.Id != id);
+        if (existingUserWithSameEmail)
+        {
+            return TypedResults.BadRequest("The email is already associated with another user.");
+        }
+        user.Email = userEditDTO.Email;
+    }
+
+    // Update the user's group associations based on either group IDs or group names.
+    if (userEditDTO.GroupIds != null || userEditDTO.GroupNames != null)
+    {
+        // Remove all existing group associations for this user.
+        db.UserGroups.RemoveRange(user.UserGroups);
+
+        List<int> newGroupIds = new List<int>();
+
+        // If group IDs are provided, use them.
+        if (userEditDTO.GroupIds != null)
+        {
+            newGroupIds.AddRange(userEditDTO.GroupIds);
+        }
+
+        // If group names are provided, convert them to IDs.
+        if (userEditDTO.GroupNames != null)
+        {
+            var namedGroupIds = await db.Groups
+                .Where(g => userEditDTO.GroupNames.Contains(g.GroupName))
+                .Select(g => g.GroupId)
+                .ToListAsync();
+
+            newGroupIds.AddRange(namedGroupIds);
+        }
+
+        // Ensure no duplicates.
+        newGroupIds = newGroupIds.Distinct().ToList();
+
+        // Add new group associations.
+        foreach (var groupId in newGroupIds)
+        {
+            user.UserGroups.Add(new UserGroup { UserId = id, GroupId = groupId });
+        }
+    }
+
+    await db.SaveChangesAsync();
+
+    return TypedResults.Ok(new UserItemDTO(user));
+}
+static async Task<IResult> VerifyPassword(int id, PasswordVerifyDTO passwordDTO, db db)
+{
+    var user = await db.Users.FindAsync(id);
+    if (user == null)
+    {
+        return TypedResults.NotFound($"User with ID {id} not found.");
+    }
+
+    bool isPasswordCorrect = VerifyHashedPassword(user.Password, passwordDTO.Password);
+
+    if (!isPasswordCorrect)
+    {
+        return TypedResults.BadRequest("Incorrect password.");
+    }
+
+    return TypedResults.Ok(new { status = "Password is correct" });
 }
 
 
