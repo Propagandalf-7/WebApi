@@ -48,6 +48,10 @@ else
             }
         </tbody>
     </table>
+    <div>
+        <p>Total Users: @totalUsers</p>
+    </div>
+
 }
 
 @if (showAddOrUpdate)
@@ -146,12 +150,17 @@ else
     private int selectedGroupId;
     private bool showEditGroups = false;
     private string errorMessage = null;
+    private int totalUsers;
+
 
 
     protected override async Task OnInitializedAsync()
     {
         await LoadUsers();
         groups = await Http.GetFromJsonAsync<List<GroupItemDTO>>("https://localhost:7097/pentagon/group");
+
+        var totalUsersResponse = await Http.GetFromJsonAsync<TotalUsersResponseDTO>("https://localhost:7097/pentagon/user/count");
+        totalUsers = totalUsersResponse.TotalUsers;
     }
 
     private async Task LoadUsers()
@@ -262,6 +271,8 @@ else
             await Http.DeleteAsync($"https://localhost:7097/pentagon/user/{user.Id}");
             await LoadUsers();
         }
+        var totalUsersResponse = await Http.GetFromJsonAsync<TotalUsersResponseDTO>("https://localhost:7097/pentagon/user/count");
+        totalUsers = totalUsersResponse.TotalUsers;
     }
 
     private void StartEditUserGroups(UserItemDTO user)
@@ -319,12 +330,15 @@ else
 
             // Make the HTTP post request
             var response = await Http.PostAsync("https://localhost:7097/pentagon/user", new StringContent(JsonSerializer.Serialize(userInput), Encoding.UTF8, "application/json"));
+            var totalUsersResponse = await Http.GetFromJsonAsync<TotalUsersResponseDTO>("https://localhost:7097/pentagon/user/count");
+            totalUsers = totalUsersResponse.TotalUsers;
 
             if (!response.IsSuccessStatusCode)
             {
                 errorMessage = $"An error occurred: {response.ReasonPhrase}.";
                 return;
             }
+            
         }
         else  // Existing User
         {

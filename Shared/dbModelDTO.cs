@@ -90,6 +90,12 @@ public class EditGroupsDTO
     public List<int>? GroupIds { get; set; }
 }
 
+public class TotalUsersResponseDTO
+{
+    public int TotalUsers { get; set; }
+}
+
+
 public class PasswordVerifyDTO
 {
     public string Password { get; set; }
@@ -101,6 +107,7 @@ public class GroupItemDTO
     public string? GroupName { get; set; }
     public List<string> PermissionNames { get; set; }
     public List<int> PermissionIds { get; set; }
+    public int UserCount { get; set; }
     public bool Selected { get; set; }
 
     public GroupItemDTO() { }
@@ -134,6 +141,12 @@ public class GroupInputDTO
     public string GroupName { get; set; }
     public List<int>? PermissionIds { get; set; }
     public List<int>? PermissionNames { get; set; }
+}
+
+public class UserCountResponseDTO
+{
+    public string GroupName { get; set; }
+    public int totalUsersInGroup { get; set; }
 }
 
 public class EditPermissionsDTO

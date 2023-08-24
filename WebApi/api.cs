@@ -31,6 +31,7 @@ todoItems.MapPost("/user", CreateUser); // Create a user
 todoItems.MapDelete("/user/{id}", DeleteUser); // Delete a user by id
 todoItems.MapPut("/user/{id}/groups", EditUserGroups); // Edit a user group
 todoItems.MapPut("/user/{id}", EditUserDetails); // Edit a user
+todoItems.MapGet("/user/count", CountUsers); // Count all users
 
 todoItems.MapPost("/user/{id}/verify-password", VerifyPassword); // Verify a user password
 
@@ -39,6 +40,7 @@ todoItems.MapGet("/group/{id}", GetGroup); // Get group by id
 todoItems.MapPost("/group", CreateGroup); // Create group
 todoItems.MapDelete("/group/{id}", DeleteGroup); // Delete a group by id
 todoItems.MapPut("/group/{id}/permissions", EditGroupPermissions); // Edit a group permissions
+todoItems.MapGet("/group/{id}/user-count", CountUsersPerGroup); // Count users in a specific group
 
 todoItems.MapGet("/permission", GetAllPermissions); // Get all permissions
 todoItems.MapGet("/permission/{id}", GetPermission); // Get permission by id
@@ -310,6 +312,11 @@ static async Task<IResult> VerifyPassword(int id, PasswordVerifyDTO passwordDTO,
 
     return TypedResults.Ok(new { status = "Password is correct" });
 }
+static async Task<IResult> CountUsers(db db)
+{
+    var userCount = await db.Users.CountAsync();
+    return TypedResults.Ok(new { TotalUsers = userCount });
+}
 
 
 static async Task<IResult> GetAllGroups(db db)
@@ -437,6 +444,25 @@ static async Task<IResult> EditGroupPermissions(int id, GroupPremissionDTO Group
     await db.SaveChangesAsync();
 
     return TypedResults.Ok(new GroupItemDTO(group));
+}
+static async Task<IResult> CountUsersPerGroup(int id, db db)
+{
+    var group = await db.Groups
+        .Include(g => g.UserGroups)
+        .FirstOrDefaultAsync(g => g.GroupId == id);
+
+    if (group == null)
+    {
+        return TypedResults.NotFound($"Group with ID {id} not found.");
+    }
+
+    int userCountInGroup = group.UserGroups.Count;
+
+    return TypedResults.Ok(new
+    {
+        GroupName = group.GroupName,
+        TotalUsersInGroup = userCountInGroup
+    });
 }
 
 

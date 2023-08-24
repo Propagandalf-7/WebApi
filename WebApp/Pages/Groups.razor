@@ -23,6 +23,7 @@ else
         <thead>
             <tr>
                 <th>Group Name</th>
+                <th>User Count</th>
                 <th>Permission Names</th>
                 <th>Actions</th>
             </tr>
@@ -32,6 +33,7 @@ else
             {
                 <tr>
                     <td>@group.GroupName</td>
+                    <td>@group.UserCount</td> <!-- Add this line -->
                     <td>@string.Join(", ", group.PermissionNames)</td>
                     <td>
                         <button @onclick="() => StartEditGroupPermissions(group)">Edit Permissions</button>
@@ -107,7 +109,25 @@ else
     {
         await LoadGroups();
         permissions = await Http.GetFromJsonAsync<List<PermissionItemDTO>>("https://localhost:7097/pentagon/permission");
+
+        foreach (var group in groups)
+        {
+            var userCountResponse = await Http.GetAsync($"https://localhost:7097/pentagon/group/{group.GroupId}/user-count");
+
+            if (userCountResponse.IsSuccessStatusCode)
+            {
+                var userCountRawData = await userCountResponse.Content.ReadAsStringAsync();
+
+                // Log raw data using JSRuntime
+                await JSRuntime.InvokeVoidAsync("console.log", userCountRawData);
+
+                var userCountResult = JsonSerializer.Deserialize<UserCountResponseDTO>(userCountRawData);
+                group.UserCount = userCountResult.totalUsersInGroup;
+            }
+        }
+
     }
+
 
     private async Task LoadGroups()
     {
