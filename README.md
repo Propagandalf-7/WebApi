@@ -8,12 +8,17 @@ The web app is a blazor app that interacts with the database through the api. Th
 
 Most of the website was built using documentation, and help from chatgpt, as my experience with this level of .NET is very limited.
 
+The theme of the database is of the Pentagon and a miltitary database, just for fun.
+
+## How to use:
+- 
+
 ## Know issues:
-- ** Password management of the users aren't safe.
-- ** Lack of documentation and comments in code. I did try to make the code clear using good variable names.
-- ** Canceling an update using the web app mid update can cause the web page to throw an error which has not been addressed.
-- ** There is inconsitency on the format of the api responses for errors.
-- ** API errors do not propagate to the web interface.
+-  Password management of the users aren't safe.
+-  Lack of documentation and comments in code. I did try to make the code clear using good variable names.
+-  Canceling an update using the web app mid update can cause the web page to throw an error which has not been addressed.
+-  There is inconsitency on the format of the api responses for errors.
+-  API errors do not propagate to the web interface.
 
 
 # Pentagon API Documentation
@@ -47,7 +52,7 @@ Most of the website was built using documentation, and help from chatgpt, as my 
 
     ```json
     {
-        "groupids": [1, 2]
+        "groupids": ["level_x", "level_x"]
     }
     ```
 
@@ -58,12 +63,12 @@ Most of the website was built using documentation, and help from chatgpt, as my 
 
     ```json
     {
-        "name":"Rudi",
-        "surname":"du Toit",
-        "email":"rudidutoit071@gmail.com",
-        "newpassword":"1235",
-        "oldpassword":"admin",
-        "GroupIds": [2]
+        "name":"john",
+        "surname":"do",
+        "email":"john.doe@email.com",
+        "newpassword":"1234",
+        "oldpassword":"1234",
+        "GroupIds": ["a_group"]
     }
     ```
 
@@ -74,11 +79,11 @@ Most of the website was built using documentation, and help from chatgpt, as my 
 
     ```json
     {
-        "name":"Rudi",
-        "surname":"du Toit",
-        "email":"rudidutoit071@gmail.com",
-        "password":"1235",
-        "GroupIds": [2,8]
+        "name":"john",
+        "surname":"do",
+        "email":"john.doe@email.com",
+        "password":"1234",
+        "GroupIds": ["a_group","a_group"]
     }
     ```
 
@@ -105,7 +110,7 @@ Most of the website was built using documentation, and help from chatgpt, as my 
 
     ```json
     {
-        "PermissionIds": [1, 2]
+        "PermissionIds": ["level_x", "level_x"]
     }
     ```
 
@@ -116,8 +121,8 @@ Most of the website was built using documentation, and help from chatgpt, as my 
 
     ```json
     {
-        "GroupName":"Test",
-        "PermissionIds":[1]
+        "GroupName":"a_group",
+        "PermissionIds":["level_x"]
     }
     ```
 
@@ -144,14 +149,11 @@ Most of the website was built using documentation, and help from chatgpt, as my 
 
     ```json
     {
-        "PermissionName":"Test"
+        "PermissionName":"level_x"
     }
     ```
 
 ---
-
-
-
 
 
 ## References
