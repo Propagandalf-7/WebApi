@@ -1,4 +1,5 @@
-﻿public class User
+﻿//This class contains the table defintions of the database
+public class User
 {
     public int Id { get; set; }
     public string? Name { get; set; }

@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// This class sets up the database, byt initializing the tables, setting the relationships
+// and seeding the tables with dummy data.
 
+using Microsoft.EntityFrameworkCore;
 class db : DbContext
 {
     public db(DbContextOptions<db> options)

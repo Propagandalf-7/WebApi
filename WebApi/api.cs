@@ -1,30 +1,46 @@
+// This is the main API server for interacting with the data. It follows the 
+// design pattern as suggested in the .NET simple http documentation and tutorial.
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Cors;
 using System.ComponentModel;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<db>(opt => opt.UseInMemoryDatabase("ThePentagon"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DefaultCorsPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+app.UseCors("DefaultCorsPolicy");
 
 RouteGroupBuilder todoItems = app.MapGroup("/pentagon");
 
-todoItems.MapGet("/user", GetAllUsers);
-todoItems.MapGet("/user/{id}", GetUser);
-todoItems.MapPost("/user", CreateUser);
-todoItems.MapDelete("/user/{id}", DeleteUser);
-todoItems.MapPut("/user/{id}/groups", EditUserGroups);
+todoItems.MapGet("/user", GetAllUsers); // Get all users
+todoItems.MapGet("/user/{id}", GetUser); // Get user by id
+todoItems.MapPost("/user", CreateUser); // Create a user
+todoItems.MapDelete("/user/{id}", DeleteUser); // Delete a user by id
+todoItems.MapPut("/user/{id}/groups", EditUserGroups); // Edit a user group
 
-todoItems.MapGet("/group", GetAllGroups);
-todoItems.MapGet("/group/{id}", GetGroup);
-todoItems.MapPost("/group", CreateGroup);
-todoItems.MapDelete("/group/{id}", DeleteGroup);
-todoItems.MapPut("/group/{id}/permissions", EditGroupPermissions);
+todoItems.MapGet("/group", GetAllGroups); // Get all groups
+todoItems.MapGet("/group/{id}", GetGroup); // Get group by id
+todoItems.MapPost("/group", CreateGroup); // Create group
+todoItems.MapDelete("/group/{id}", DeleteGroup); // Delete a group by id
+todoItems.MapPut("/group/{id}/permissions", EditGroupPermissions); // Edit a group permissions
 
-todoItems.MapGet("/permission", GetAllPermissions);
-todoItems.MapGet("/permission/{id}", GetPermission);
-todoItems.MapPost("/permission", CreatePermissions);
-todoItems.MapDelete("/permission/{id}", DeletePermission);
+todoItems.MapGet("/permission", GetAllPermissions); // Get all permissions
+todoItems.MapGet("/permission/{id}", GetPermission); // Get permission by id
+todoItems.MapPost("/permission", CreatePermissions); // Create a permission
+todoItems.MapDelete("/permission/{id}", DeletePermission); // Delete a permission by id
 
 
 using (var scope = app.Services.CreateScope()) // Ensure seeded data gets loading into DB.

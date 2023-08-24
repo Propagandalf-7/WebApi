@@ -1,4 +1,8 @@
-﻿public class UserItemDTO
+﻿// This class contains data transfer objects (DTO) classes. These classes are used
+// for input, edit and viewing of the data. The data in these classes can be structured
+// in a specific way to return relationships between multiple tables as a single output
+// and also hide certain sensitive data.
+public class UserItemDTO
 {
     public int Id { get; set; }
     public string? Name { get; set; }
@@ -54,6 +58,7 @@
     }
 
 }
+
 public class UserInputDTO
 {
     public string Name { get; set; }
