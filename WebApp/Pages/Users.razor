@@ -101,7 +101,7 @@ else
                 <ValidationMessage For="@(() => userInput.Email)" />
             </div>
 
-            @if (userInput != null && userInput.Id != 0) // Existing User
+            @if (userInput != null && userInput.Id != 0)
             {
                 <div>
                     <label>Old Password:</label>
@@ -113,7 +113,7 @@ else
                     <input type="password" placeholder="New Password" @bind="password" />
                 </div>
             }
-            else if (userInput == null || userInput.Id == 0) // New User
+            else if (userInput == null || userInput.Id == 0)
             {
                 <div>
                     <label>Password:</label>
@@ -172,8 +172,8 @@ else
     {
         userInput = new UserInputDTO
             {
-                GroupIds = new List<int>(), // Ensure GroupIds is initialized
-                GroupNames = new List<string>() // Ensure GroupNames is initialized
+                GroupIds = new List<int>(),
+                GroupNames = new List<string>()
             };
         showAddOrUpdate = true;
     }
@@ -198,11 +198,7 @@ else
     {
         try
         {
-            // Extract the selected group IDs from the groups list
             groupInput.GroupIds = groups.Where(g => g.Selected).Select(g => g.GroupId).ToList();
-
-            // Make the HTTP request to update the groups for the user. 
-            // The endpoint URL might differ based on your backend API structure.
             var response = await Http.PutAsJsonAsync($"https://localhost:7097/pentagon/user/{groupInput.Id}/groups", groupInput);
 
             if (!response.IsSuccessStatusCode)
@@ -211,7 +207,6 @@ else
                 return;
             }
 
-            // Optionally, you can refresh the users list to see the changes immediately
             await LoadUsers();
         }
         catch (Exception ex)
@@ -220,7 +215,6 @@ else
         }
         finally
         {
-            // Reset form state regardless of success or error.
             showAddOrUpdate = false;
             showEditGroups = false;
             groupInput = null;
@@ -240,7 +234,6 @@ else
                 GroupNames = user.GroupNames?.ToList() ?? new List<string>()
             };
 
-        // Preselect the groups that the user is part of
         foreach (var group in groups)
         {
             group.Selected = userInput.GroupIds.Contains(group.GroupId);
@@ -294,7 +287,7 @@ else
     {
         userInput.GroupIds = groups.Where(g => g.Selected).Select(g => g.GroupId).ToList();
 
-        if (userInput.Id == 0)  // New User
+        if (userInput.Id == 0)
         {
             if (string.IsNullOrEmpty(userInput.Name))
             {
@@ -328,7 +321,6 @@ else
 
             userInput.Password = password;
 
-            // Make the HTTP post request
             var response = await Http.PostAsync("https://localhost:7097/pentagon/user", new StringContent(JsonSerializer.Serialize(userInput), Encoding.UTF8, "application/json"));
             var totalUsersResponse = await Http.GetFromJsonAsync<TotalUsersResponseDTO>("https://localhost:7097/pentagon/user/count");
             totalUsers = totalUsersResponse.TotalUsers;
@@ -340,7 +332,7 @@ else
             }
             
         }
-        else  // Existing User
+        else
         {
             if (!string.IsNullOrEmpty(oldPassword) && !string.IsNullOrEmpty(password))
             {
@@ -351,7 +343,6 @@ else
                     var isValidOldPassword = await response.Content.ReadFromJsonAsync<bool>();
                     if (!isValidOldPassword)
                     {
-                        // Alert the user about the invalid old password and return
                         await JSRuntime.InvokeVoidAsync("alert", "Invalid old password provided.");
                         return;
                     }
@@ -360,7 +351,6 @@ else
                 }
                 else
                 {
-                    // Handle the error response here (e.g., alert the user about a server error)
                     await JSRuntime.InvokeVoidAsync("alert", "An error occurred while validating the old password.");
                     return;
                 }
@@ -374,8 +364,8 @@ else
         await LoadUsers();
         showAddOrUpdate = false;
         userInput = null;
-        oldPassword = null; // Clear old password field
-        password = null;    // Clear new password field
+        oldPassword = null;
+        password = null;
         errorMessage = null;
     }
 

@@ -42,6 +42,7 @@ class db : DbContext
             .HasForeignKey(gp => gp.PermissionId);
 
         //SEEDING
+        // Just just seeds the database with random data. Remove/Uncomment this to have a clean DB.
         modelBuilder.Entity<Permission>().HasData(
             new Permission { PermissionId = 1, PermissionName = "Level_1" },
             new Permission { PermissionId = 2, PermissionName = "Level_2" },

@@ -95,7 +95,6 @@ public class TotalUsersResponseDTO
     public int TotalUsers { get; set; }
 }
 
-
 public class PasswordVerifyDTO
 {
     public string Password { get; set; }
@@ -151,9 +150,7 @@ public class UserCountResponseDTO
 
 public class EditPermissionsDTO
 {
-    public int GroupId { get; set; } // Group's ID for which permissions are being edited.
-
-    // List of permission IDs the group should have.
+    public int GroupId { get; set; }
     public List<int> PermissionIds { get; set; } = new List<int>();
 }
 
@@ -161,9 +158,7 @@ public class PermissionItemDTO
 {
     public int PermissionId { get; set; }
     public string PermissionName { get; set; }
-
     public bool Selected { get; set; }
-
     public PermissionItemDTO() { }
     public PermissionItemDTO(Permission permission)
     {

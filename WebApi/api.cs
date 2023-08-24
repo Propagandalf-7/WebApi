@@ -55,12 +55,12 @@ using (var scope = app.Services.CreateScope()) // Ensure seeded data gets loadin
 }
 app.Run();
 
-static string HashPassword(string password)
+static string HashPassword(string password) // Should be implemented to do proper hashing
 {
     return password;
 }
 
-static bool VerifyHashedPassword(string checkPassword, string storedPassword)
+static bool VerifyHashedPassword(string checkPassword, string storedPassword) // Should be implemented to do proper hashing
 {
     if (checkPassword == storedPassword)
     {
@@ -119,7 +119,7 @@ static async Task<IResult> CreateUser(UserInputDTO UserInputDTO, db db)
     var result = await AssignGroupsToUser(userItem, UserInputDTO.GroupIds, UserInputDTO.GroupNames, db);
     if (result is BadRequestResult)
     {
-        return result;  // or use proper casting if needed.
+        return result;
     }
 
     db.Users.Add(userItem);
@@ -158,7 +158,7 @@ static async Task<IResult> EditUserGroups(int id, UserGroupsEditDTO editDTO, db 
     var result = await AssignGroupsToUser(user, editDTO.GroupIds, editDTO.GroupNames, db);
     if (result is BadRequestResult)
     {
-        return result;  // or use proper casting if needed.
+        return result;
     }
 
     await db.SaveChangesAsync();
@@ -217,7 +217,6 @@ static async Task<IResult> EditUserDetails(int id, UserEditDTO userEditDTO, db d
         return TypedResults.NotFound($"User with ID {id} not found.");
     }
 
-    // Check old password if a new one is provided
     if (!string.IsNullOrWhiteSpace(userEditDTO.NewPassword))
     {
         if (string.IsNullOrWhiteSpace(userEditDTO.OldPassword))
@@ -235,7 +234,6 @@ static async Task<IResult> EditUserDetails(int id, UserEditDTO userEditDTO, db d
         user.Password = HashPassword(userEditDTO.NewPassword); // Update with new hashed password
     }
 
-    // Update other user details
     if (!string.IsNullOrWhiteSpace(userEditDTO.Name))
     {
         user.Name = userEditDTO.Name;
@@ -256,21 +254,15 @@ static async Task<IResult> EditUserDetails(int id, UserEditDTO userEditDTO, db d
         user.Email = userEditDTO.Email;
     }
 
-    // Update the user's group associations based on either group IDs or group names.
     if (userEditDTO.GroupIds != null || userEditDTO.GroupNames != null)
     {
-        // Remove all existing group associations for this user.
         db.UserGroups.RemoveRange(user.UserGroups);
 
         List<int> newGroupIds = new List<int>();
-
-        // If group IDs are provided, use them.
         if (userEditDTO.GroupIds != null)
         {
             newGroupIds.AddRange(userEditDTO.GroupIds);
         }
-
-        // If group names are provided, convert them to IDs.
         if (userEditDTO.GroupNames != null)
         {
             var namedGroupIds = await db.Groups
@@ -281,10 +273,8 @@ static async Task<IResult> EditUserDetails(int id, UserEditDTO userEditDTO, db d
             newGroupIds.AddRange(namedGroupIds);
         }
 
-        // Ensure no duplicates.
         newGroupIds = newGroupIds.Distinct().ToList();
 
-        // Add new group associations.
         foreach (var groupId in newGroupIds)
         {
             user.UserGroups.Add(new UserGroup { UserId = id, GroupId = groupId });
@@ -346,8 +336,6 @@ static async Task<IResult> CreateGroup(GroupInputDTO GroupInputDTO, db db)
     {
         return TypedResults.BadRequest("Group name is required.");
     }
-
-    // Check for existing group with the same name
     var existingGroup = await db.Groups.FirstOrDefaultAsync(g => g.GroupName == GroupInputDTO.GroupName);
     if (existingGroup != null)
     {
@@ -503,8 +491,6 @@ static async Task<IResult> DeletePermission(int id, db db)
     {
         return TypedResults.NotFound($"Permission with ID {id} not found.");
     }
-
-    // Before removing the permission, it might be a good idea to check if any group still references it.
     var isPermissionUsed = await db.GroupPermissions.AnyAsync(gp => gp.PermissionId == id);
     if (isPermissionUsed)
     {

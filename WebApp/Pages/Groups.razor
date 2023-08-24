@@ -117,10 +117,7 @@ else
             if (userCountResponse.IsSuccessStatusCode)
             {
                 var userCountRawData = await userCountResponse.Content.ReadAsStringAsync();
-
-                // Log raw data using JSRuntime
                 await JSRuntime.InvokeVoidAsync("console.log", userCountRawData);
-
                 var userCountResult = JsonSerializer.Deserialize<UserCountResponseDTO>(userCountRawData);
                 group.UserCount = userCountResult.totalUsersInGroup;
             }
