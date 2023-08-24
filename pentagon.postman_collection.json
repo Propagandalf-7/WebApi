@@ -100,6 +100,36 @@
 			"response": []
 		},
 		{
+			"name": "/user/{id}",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\":\"Rudi\",\r\n    \"surname\":\"du Toit\",\r\n    \"email\":\"rudidutoit071@gmail.com\",\r\n    \"newpassword\":\"1235\",\r\n    \"oldpassword\":\"admin\",\r\n    \"GroupIds\": [2]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7097/pentagon/user/1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"user",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "/user",
 			"request": {
 				"method": "POST",
@@ -123,6 +153,35 @@
 					"path": [
 						"pentagon",
 						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/user/{id}/verify-password",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"PermissionName\":\"Test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7097/pentagon/permission",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7097",
+					"path": [
+						"pentagon",
+						"permission"
 					]
 				}
 			},
@@ -191,7 +250,7 @@
 			"response": []
 		},
 		{
-			"name": "/group/id Copy",
+			"name": "/group/{id}/permissions",
 			"request": {
 				"method": "PUT",
 				"header": [],
