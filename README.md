@@ -11,7 +11,9 @@ Most of the website was built using documentation, and help from chatgpt, as my 
 The theme of the database is of the Pentagon and a miltitary database, just for fun.
 
 ## How to use:
-- 
+- Open project in visual studio.
+- Configure the WebAppApi and WebApp apps to both run at start up.
+- Run and use either postman directly, or use the browser window that opens up.
 
 ## Know issues:
 -  Password management of the users aren't safe.
@@ -68,7 +70,7 @@ The theme of the database is of the Pentagon and a miltitary database, just for 
         "email":"john.doe@email.com",
         "newpassword":"1234",
         "oldpassword":"1234",
-        "GroupIds": ["a_group"]
+        "GroupIds": ["some_group"]
     }
     ```
 
@@ -83,7 +85,7 @@ The theme of the database is of the Pentagon and a miltitary database, just for 
         "surname":"do",
         "email":"john.doe@email.com",
         "password":"1234",
-        "GroupIds": ["a_group","a_group"]
+        "GroupIds": ["some_group","some_group"]
     }
     ```
 
@@ -121,7 +123,7 @@ The theme of the database is of the Pentagon and a miltitary database, just for 
 
     ```json
     {
-        "GroupName":"a_group",
+        "GroupName":"some_group",
         "PermissionIds":["level_x"]
     }
     ```
